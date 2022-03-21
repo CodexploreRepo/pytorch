@@ -3,7 +3,8 @@
 # Table of contents
 - [Table of contents](#table-of-contents)
 - [1. Basics](#1-basics)
-- [2. Backpropagation](#2-backpropagation )
+- [2. Backpropagation](#2-backpropagation)
+- [3. Training Pipeline: Model, Loss, and Optimizer](#3-training-pipeline)
 
 
 # 1. Basics
@@ -49,7 +50,7 @@ w.grad.zero_()
 
 ### Next Forward and backward iterations
 ```
-
+# 3. Training Pipeline
 
 
 
