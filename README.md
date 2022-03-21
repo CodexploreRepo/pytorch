@@ -51,6 +51,15 @@ w.grad.zero_()
 ### Next Forward and backward iterations
 ```
 # 3. Training Pipeline
+- Step 1: Design model 
+  - Input: ROW = Number of Training instances; COL = Number of Features
+  - Output
+  - Forward pass with different layers
+- Step 2: Construct `loss` and `optimizer` (init weigths or model parameters)
+- Step 3: Training loop
+  - Forward = compute prediction and loss
+  - Backward = compute gradients
+  - Update weights
 
 
 
