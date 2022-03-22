@@ -91,6 +91,7 @@ class LogisticRegression(nn.Module):
         #super(Model, self).__init__() = super().__init__(self)
         #this allows to init the model without any input paras: model = LogisticRegression()
         super(LogisticRegression, self).__init__()
+        
         #First f = wx + b, then apply sigmoid at the end
         self.linear = nn.Linear(n_input_features, output_size)
     
