@@ -5,6 +5,7 @@
 - [1. Basics](#1-basics)
 - [2. Backpropagation](#2-backpropagation)
 - [3. Training Pipeline: Model, Loss, and Optimizer](#3-training-pipeline)
+  - [3.1. Example of Training Pipeline](#31-example-of-training-pipeline) 
 
 
 # 1. Basics
