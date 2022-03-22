@@ -12,6 +12,8 @@
 
 # 1. Basics
 
+[(Back to top)](#table-of-contents)
+
 # 2. Backpropagation
 1. **Forward Pass** &#8594; Compute Loss
   <p align="center">
@@ -53,6 +55,9 @@ w.grad.zero_()
 
 ### Next Forward and backward iterations
 ```
+
+[(Back to top)](#table-of-contents)
+
 # 3. Training Pipeline
 - Step 1: Design model 
   - Input: ROW = Number of Training instances; COL = Number of Features
@@ -140,7 +145,54 @@ with torch.no_grad(): #to ensure this is not in the computation graph
     print(f"Accuracy = {acc:.4f}")
 ```
 
+[(Back to top)](#table-of-contents)
+
 # 4. Dataset and DataLoader
 ## 4.1. Dataset
+- Import Dataset Class from Pytorch Utils: `from torch.utils.data import Dataset`
+```Python
+class WineDataset(Dataset):
+    def __init__(self):
+        #data loading
+        xy = np.loadtxt('./data/wine.csv', delimiter=',', dtype=np.float32, skiprows=1) #skiprows=1 skip header row
+        self.x = torch.from_numpy(xy[:, 1:])
+        self.y = torch.from_numpy(xy[:, [0]]) # [0]  : (n_samples, 1)
+        self.n_samples = xy.shape[0]
+
+    def __getitem__(self, index):
+        return self.x[index], self.y[index]
+
+    def __len__(self):
+        return self.n_samples
+
+```
 
 ## 4.2. DataLoader
+- Instead of updating the entire dataset per epoch, we can split the dataset into small batches.
+- Say, `1 epoch` with `batch_size = 4`, we can have ` math.ceil(total_samples/batch_size)` update iterations to compute the loss, gradient and update the weights.
+```Python
+batch_size = 4
+dataloader = DataLoader(dataset=dataset,
+                        batch_size=batch_size,
+                        shuffle=True,
+                        num_workers=2,
+                        )
+                        
+num_epochs = 2
+total_samples = len(dataset)
+#n of update iterations per epoch
+n_iterations = math.ceil(total_samples/batch_size) 
+
+
+for epoch in range(num_epochs):
+    for i, (inputs, labels) in enumerate(dataloader):
+        # forward backward, update
+        if (i+1) % 5 == 0:
+            print(f"Epoch {epoch + 1}/{num_epochs}, step {i+1}/{n_iterations}, inputs: {inputs.shape[0]} samples")
+
+#epoch 1/2, step 5/45, inputs: 4 samples
+#epoch 1/2, step 10/45, inputs: 4 samples
+#epoch 1/2, step 15/45, inputs: 4 samples
+```
+
+[(Back to top)](#table-of-contents)
