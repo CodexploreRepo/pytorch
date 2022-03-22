@@ -61,5 +61,77 @@ w.grad.zero_()
   - Backward = compute gradients
   - Update weights
 
+## 3.1. Example of Training Pipeline
+#### Step 0: Load Data & Convert to Py Torch format
+```Python
+#0) Prepare data
+bc = datasets.load_breast_cancer()
+X, y = bc.data, bc.target
 
+n_samples, n_features = X.shape
+#print(n_samples, n_features) #569 samples with 30 features
 
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=2022)
+
+#Convert to Torch
+X_train = torch.from_numpy(X_train.astype(np.float32)) #need to convert to float 
+y_train = torch.from_numpy(y_train.astype(np.float32)) #need to convert to float
+X_test = torch.from_numpy(X_test.astype(np.float32))   #need to convert to float
+y_test = torch.from_numpy(y_test.astype(np.float32))   #need to convert to float
+
+#Convert y into from [0,1,2,3] ==> [[0], [1], [1]]
+y_train = y_train.view(y_train.shape[0], 1)
+y_test = y_test.view(y_test.shape[0], 1)
+```
+#### Step 1: Design Model
+```Python
+class LogisticRegression(nn.Module):
+    def __init__(self, n_input_features, output_size):
+        #super(Model, self).__init__() = super().__init__(self)
+        #this allows to init the model without any input paras: model = LogisticRegression()
+        super(LogisticRegression, self).__init__()
+        #First f = wx + b, then apply sigmoid at the end
+        self.linear = nn.Linear(n_input_features, output_size)
+    
+    def forward(self, x):
+        y_predicted = torch.sigmoid(self.linear(x))
+        return y_predicted
+
+input_size = n_features
+output_size = 1
+
+model = LogisticRegression(n_features, output_size)
+```
+#### Step 2: Design Model
+```Python
+num_epochs = 100
+learning_rate = 0.01
+criterion = nn.BCELoss() #binary cross-entropy
+optimmizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+```
+#### Step 3: Training Loop
+```Python
+
+for epoch in range(num_epochs):
+    #forward pass & loss
+    y_predicted = model.forward(X_train)
+    loss = criterion(y_predicted, y_train)
+    #backward pass
+    loss.backward()
+
+    #weight update
+    optimmizer.step()
+    optimmizer.zero_grad()
+
+    if (epoch + 1) % 10 == 0:
+        print(f"Epoch {epoch+1:>3,}: Loss: {loss.item():.3f}")
+```
+
+#### Step 4:  Evaludation
+```Python
+with torch.no_grad(): #to ensure this is not in the computation graph
+    y_predicted = model(X_test)
+    y_predicted_cls = y_predicted.round() #Since sigmoid return btw 0~1
+    acc = y_predicted_cls.eq(y_test).sum()/float(y_test.shape[0])
+    print(f"Accuracy = {acc:.4f}")
+```
