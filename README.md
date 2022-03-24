@@ -9,6 +9,7 @@
 - [4. Dataset & DataLoader](#4-dataset-and-dataloader)
   - [4.1. Dataset](#41-dataset)
   - [4.2. Dataloader](#42-dataloader) 
+- [Resources](#resources)
 
 # 1. Basics
 
@@ -195,4 +196,11 @@ for epoch in range(num_epochs):
 #epoch 1/2, step 15/45, inputs: 4 samples
 ```
 
+[(Back to top)](#table-of-contents)
+
+
+# Resources
+## Todo List
+- [Hyperparameter Tuning of Neural Networks with Optuna and PyTorch](https://towardsdatascience.com/hyperparameter-tuning-of-neural-networks-with-optuna-and-pytorch-22e179efc837) 
+- 
 [(Back to top)](#table-of-contents)
