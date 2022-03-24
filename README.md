@@ -9,6 +9,8 @@
 - [4. Dataset & DataLoader](#4-dataset-and-dataloader)
   - [4.1. Dataset](#41-dataset)
   - [4.2. Dataloader](#42-dataloader) 
+- [5. Transform](#5-transform)
+- [6. Softmax and Cross Entropy](#6-softmax-cross-entropy)
 - [Resources](#resources)
 
 # 1. Basics
@@ -198,6 +200,11 @@ for epoch in range(num_epochs):
 
 [(Back to top)](#table-of-contents)
 
+# 5. Transform
+
+[(Back to top)](#table-of-contents)
+
+# 6. Softmax and Cross Entropy
 
 # Resources
 ## Todo List
