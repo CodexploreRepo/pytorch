@@ -205,9 +205,15 @@ for epoch in range(num_epochs):
 [(Back to top)](#table-of-contents)
 
 # 6. Softmax and Cross Entropy
+## 6.1. Softmax
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/64508435/159864817-bd10b5c0-1537-4ee9-bff9-9bb52ae792dc.png" width="400" />
+</p>
+## 6.2. Cross Entropy Loss
+- Cross Entropy Loss's input = `y_pred` in logits (not softmax probability)
 
 # Resources
 ## Todo List
 - [Hyperparameter Tuning of Neural Networks with Optuna and PyTorch](https://towardsdatascience.com/hyperparameter-tuning-of-neural-networks-with-optuna-and-pytorch-22e179efc837) 
-- 
+
 [(Back to top)](#table-of-contents)
