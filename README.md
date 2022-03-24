@@ -10,7 +10,7 @@
   - [4.1. Dataset](#41-dataset)
   - [4.2. Dataloader](#42-dataloader) 
 - [5. Transform](#5-transform)
-- [6. Softmax and Cross Entropy](#6-softmax-cross-entropy)
+- [6. Softmax and Cross Entropy](#6-softmax-and-cross-entropy)
 - [Resources](#resources)
 
 # 1. Basics
