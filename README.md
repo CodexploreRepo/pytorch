@@ -6,7 +6,7 @@
 - [2. Backpropagation](#2-backpropagation)
 - [3. Training Pipeline: Model, Loss, and Optimizer](#3-training-pipeline)
   - [3.1. Example of Training Pipeline](#31-example-of-training-pipeline)
-  - [3.2. Save and Load Model]
+  - [3.2. Save and Load Model](#32-save-and-load-model)
 - [4. Dataset & DataLoader](#4-dataset-and-dataloader)
   - [4.1. Dataset](#41-dataset)
   - [4.2. Dataloader](#42-dataloader) 
