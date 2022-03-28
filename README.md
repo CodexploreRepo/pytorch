@@ -5,7 +5,8 @@
 - [1. Basics](#1-basics)
 - [2. Backpropagation](#2-backpropagation)
 - [3. Training Pipeline: Model, Loss, and Optimizer](#3-training-pipeline)
-  - [3.1. Example of Training Pipeline](#31-example-of-training-pipeline) 
+  - [3.1. Example of Training Pipeline](#31-example-of-training-pipeline)
+  - [3.2. Save and Load Model]
 - [4. Dataset & DataLoader](#4-dataset-and-dataloader)
   - [4.1. Dataset](#41-dataset)
   - [4.2. Dataloader](#42-dataloader) 
@@ -147,6 +148,9 @@ with torch.no_grad(): #to ensure this is not in the computation graph
     acc = y_predicted_cls.eq(y_test).sum()/float(y_test.shape[0])
     print(f"Accuracy = {acc:.4f}")
 ```
+
+## 3.2. Save and Load Model
+- [Reference](https://towardsdatascience.com/how-to-save-and-load-a-model-in-pytorch-with-a-complete-example-c2920e617dee)
 
 [(Back to top)](#table-of-contents)
 
