@@ -10,7 +10,7 @@
 - [4. Dataset & DataLoader](#4-dataset-and-dataloader)
   - [4.1. Dataset](#41-dataset)
   - [4.2. Dataloader](#42-dataloader) 
-- [5. Transform](#5-transform)
+- [5. Dataset Transform](#5-dataset-transform)
 - [6. Softmax and Cross Entropy](#6-softmax-and-cross-entropy)
 - [Resources](#resources)
 
@@ -204,7 +204,60 @@ for epoch in range(num_epochs):
 
 [(Back to top)](#table-of-contents)
 
-# 5. Transform
+# 5. Dataset Transform
+- Transforms can be applied to PIL images, tensors, ndarrays, or custom data
+during creation of the DataSet
+- Refernce: [Torch Transform](https://pytorch.org/vision/stable/transforms.html)
+```Python
+class WineDataset(Dataset):
+    def __init__(self, transform=None):
+        #data loading
+        xy = np.loadtxt('./data/wine.csv', delimiter=',', dtype=np.float32, skiprows=1) #skiprows=1 skip header row
+        self.n_samples = xy.shape[0]
+
+        self.x = xy[:, 1:]
+        self.y = xy[:, [0]] # [0]  : (n_samples, 1)
+        
+        self.transform = transform
+
+
+    def __getitem__(self, index):
+        sample = self.x[index], self.y[index]
+        if self.transform:
+            sample = self.transform(sample)
+        return sample
+
+    def __len__(self):
+        return self.n_samples
+
+# To Tensor Transform
+class ToTensor:
+    def __call__(self, sample):
+        #callable object
+        inputs, target = sample
+        return torch.from_numpy(inputs), torch.from_numpy(target)
+
+
+#transform to convert X, y into Tensor via ToTensor Transform
+dataset = WineDataset(transform=ToTensor())
+first_data = dataset[0]
+features, label = first_data
+print(type(features), type(label)) #<class 'torch.Tensor'> <class 'torch.Tensor'>
+```
+- **Composing Transforms** via  `torchvision.transforms.Compose`
+```Python
+class MulTransform:
+    def __init__(self, factor):
+        self.factor = factor
+    def __call__(self, sample):
+        inputs, targets = sample
+        inputs *= self.factor
+        return inputs, targets
+
+#Compose of List of Transforms
+composed_transforms = torchvision.transforms.Compose([ToTensor(), MulTransform(2)])
+dataset = WineDataset(transform=composed_transforms)
+```
 
 [(Back to top)](#table-of-contents)
 
