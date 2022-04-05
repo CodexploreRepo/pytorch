@@ -213,6 +213,7 @@ for epoch in range(num_epochs):
 <p align="center">
   <img src="https://user-images.githubusercontent.com/64508435/159864817-bd10b5c0-1537-4ee9-bff9-9bb52ae792dc.png" width="400" />
 </p>
+
 ## 6.2. Cross Entropy Loss
 - Cross Entropy Loss's input = `y_pred` in logits (not softmax probability)
 
