@@ -187,7 +187,7 @@ test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
                                           batch_size=batch_size, 
                                           shuffle=False) #No need to shuffle for Test Set
 ```
-- [Optional] We can use `iter()` to make `DataLoader` iterable
+- *Optional*: We can use `iter()` to make `DataLoader` iterable
 ```Python
 examples = iter(test_loader) #iter() to make test_loader iterable
 example_data, example_targets = examples.next() #use .next() to iter through the first batch & unpack them into data & target
@@ -197,7 +197,46 @@ for i in range(6): #Plot first 6 examples from the first batch
     plt.imshow(example_data[i][0], cmap='gray')
 plt.show()
 ```
-- Setting 
+- Setting the Training Loop with DataLoader
+```Python
+n_total_steps = len(train_loader)
+for epoch in range(num_epochs):
+    for i, (data, labels) in enumerate(train_loader):  
+        # origin shape: [100, 1, 28, 28]
+        # resized: [100, 784]
+        data = data.reshape(-1, 28*28).to(device) #send to device
+        labels = labels.to(device)
+        
+        # Forward pass
+        outputs = model(data)
+        loss = criterion(outputs, labels) #Compute Loss
+        
+        # Backward and optimize
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        
+        if (i+1) % 100 == 0:
+            print (f'Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{n_total_steps}], Loss: {loss.item():.4f}')
+```
+- Setting up the validation Loop on test set
+```Python
+# In test phase, we don't need to compute gradients (for memory efficiency)
+with torch.no_grad():
+    n_correct = 0
+    n_samples = 0
+    for data, labels in test_loader:
+        data = data.reshape(-1, 28*28).to(device)
+        labels = labels.to(device)
+        outputs = model(data)
+        # max returns (value ,index)
+        _, predicted = torch.max(outputs.data, 1)
+        n_samples += labels.size(0)
+        n_correct += (predicted == labels).sum().item()
+
+    acc = 100.0 * n_correct / n_samples
+    print(f'Accuracy of the network on the 10000 test images: {acc} %')
+```
 
 [(Back to top)](#table-of-contents)
 
