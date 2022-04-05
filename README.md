@@ -178,6 +178,17 @@ class WineDataset(Dataset):
 - Instead of updating the entire dataset per epoch, we can split the dataset into small batches.
 - Say, `1 epoch` with `batch_size = 4`, we can have ` math.ceil(total_samples/batch_size)` update iterations to compute the loss, gradient and update the weights.
 ```Python
+# Data loader
+train_loader = torch.utils.data.DataLoader(dataset=train_dataset, 
+                                           batch_size=batch_size, 
+                                           shuffle=True)
+
+test_loader = torch.utils.data.DataLoader(dataset=test_dataset, 
+                                          batch_size=batch_size, 
+                                          shuffle=False) #No need to shuffle for Test Set
+
+```
+```Python
 batch_size = 4
 dataloader = DataLoader(dataset=dataset,
                         batch_size=batch_size,
