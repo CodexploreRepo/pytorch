@@ -176,42 +176,28 @@ class WineDataset(Dataset):
 
 ## 4.2. DataLoader
 - Instead of updating the entire dataset per epoch, we can split the dataset into small batches.
-- Say, `1 epoch` with `batch_size = 4`, we can have ` math.ceil(total_samples/batch_size)` update iterations to compute the loss, gradient and update the weights.
+- Say, `1 epoch` with `batch_size = 100`, we can have `n_iterations = math.ceil(total_samples/batch_size)` update iterations to compute the loss, gradient and update the weights.
 ```Python
 # Data loader
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, 
-                                           batch_size=batch_size, 
+                                           batch_size=batch_size, #say, batch_size = 100
                                            shuffle=True)
 
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, 
                                           batch_size=batch_size, 
                                           shuffle=False) #No need to shuffle for Test Set
-
 ```
+- [Optional] We can use `iter()` to make `DataLoader` iterable
 ```Python
-batch_size = 4
-dataloader = DataLoader(dataset=dataset,
-                        batch_size=batch_size,
-                        shuffle=True,
-                        num_workers=2,
-                        )
-                        
-num_epochs = 2
-total_samples = len(dataset)
-#n of update iterations per epoch
-n_iterations = math.ceil(total_samples/batch_size) 
-
-
-for epoch in range(num_epochs):
-    for i, (inputs, labels) in enumerate(dataloader):
-        # forward backward, update
-        if (i+1) % 5 == 0:
-            print(f"Epoch {epoch + 1}/{num_epochs}, step {i+1}/{n_iterations}, inputs: {inputs.shape[0]} samples")
-
-#epoch 1/2, step 5/45, inputs: 4 samples
-#epoch 1/2, step 10/45, inputs: 4 samples
-#epoch 1/2, step 15/45, inputs: 4 samples
+examples = iter(test_loader) #iter() to make test_loader iterable
+example_data, example_targets = examples.next() #use .next() to iter through the first batch & unpack them into data & target
+print(example_targets.shape) #torch.Size([100])
+for i in range(6): #Plot first 6 examples from the first batch
+    plt.subplot(2,3,i+1)
+    plt.imshow(example_data[i][0], cmap='gray')
+plt.show()
 ```
+- Setting 
 
 [(Back to top)](#table-of-contents)
 
