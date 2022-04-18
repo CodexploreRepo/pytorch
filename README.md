@@ -321,9 +321,9 @@ class NeuralNet(nn.Module):
     def __init__(self, input_size, hidden_size):
         super(NeuralNet, self).__init__()
         ....
-        self.relu = nn.ReLU()         #directly from nn module
+        self.relu = nn.ReLU()         #declear from nn module in init method
         ....
-        self.sigmoid = nn.Sigmoid()   #directly from nn module
+        self.sigmoid = nn.Sigmoid()   #declear from nn module in init method
     
     def forward(self, x):
         out = self.linear1(x)
