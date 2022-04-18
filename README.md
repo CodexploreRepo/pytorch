@@ -12,6 +12,7 @@
   - [4.2. Dataloader](#42-dataloader) 
 - [5. Dataset Transform](#5-dataset-transform)
 - [6. Softmax and Cross Entropy](#6-softmax-and-cross-entropy)
+- [7. Activation Functions](#7-activation-functions)
 - [Resources](#resources)
 
 # 1. Basics
@@ -305,6 +306,48 @@ dataset = WineDataset(transform=composed_transforms)
 
 ## 6.2. Cross Entropy Loss
 - Cross Entropy Loss's input = `y_pred` in logits (not softmax probability)
+
+[(Back to top)](#table-of-contents)
+
+# 7. Activation Functions 
+- There are 2 options to implement the activation functions
+  - Option 1: creates an nn.Module
+  - Option 2: functional API call 
+```Python
+# option 1 (create nn modules)
+import torch.nn as nn
+
+class NeuralNet(nn.Module):
+    def __init__(self, input_size, hidden_size):
+        super(NeuralNet, self).__init__()
+        ....
+        self.relu = nn.ReLU()         #directly from nn module
+        ....
+        self.sigmoid = nn.Sigmoid()   #directly from nn module
+    
+    def forward(self, x):
+        out = self.linear1(x)
+        out = self.relu(out)         #wrapping up with the output of previous layer
+        out = self.linear2(out)
+        out = self.sigmoid(out)      #wrapping up with the output of previous layer
+        return out
+ ```
+ 
+ ```Python
+# option 1 (create nn modules)
+import torch.nn.functional as  F                            #Functional API
+
+class NeuralNet(nn.Module):
+    def __init__(self, input_size, hidden_size):
+        super(NeuralNet, self).__init__()
+        self.linear1 = nn.Linear(input_size, hidden_size)   #No need to declear activation funcition in init
+        self.linear2 = nn.Linear(hidden_size, 1)
+    
+    def forward(self, x):
+        out = F.relu(self.linear1(x))                       #Directly use
+        out = F.sigmoid(self.linear2(out))                  #Directly use
+        return out
+ ```
 
 # Resources
 ## Todo List
