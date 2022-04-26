@@ -13,6 +13,7 @@
 - [5. Dataset Transform](#5-dataset-transform)
 - [6. Softmax and Cross Entropy](#6-softmax-and-cross-entropy)
 - [7. Activation Functions](#7-activation-functions)
+- [8. CNN](#8-cnn)
 - [Resources](#resources)
 
 # 1. Basics
@@ -301,7 +302,7 @@ dataset = WineDataset(transform=composed_transforms)
 # 6. Softmax and Cross Entropy
 ## 6.1. Softmax
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/64508435/159864817-bd10b5c0-1537-4ee9-bff9-9bb52ae792dc.png" width="400" />
+  <img src="https://user-images.githubusercontent.com/64508435/159864817-bd10b5c0-1537-4ee9-bff9-9bb52ae792dc.png" width="200" />
 </p>
 
 ## 6.2. Cross Entropy Loss
@@ -348,6 +349,14 @@ class NeuralNet(nn.Module):
         out = F.sigmoid(self.linear2(out))                  #Directly use
         return out
  ```
+# 8. CNN
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/64508435/165234682-39921752-94e5-4a62-ae6b-5dd2da2ef690.png" width="400" />
+</p>
+
+
+
+[(Back to top)](#table-of-contents)
 
 # Resources
 ## Todo List
