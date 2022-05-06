@@ -87,24 +87,24 @@ optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
 n_total_steps = len(train_loader)
 
-# for epoch in range(num_epochs):
-#     for i, (images, labels) in enumerate(train_loader):
-#         # origin shape: [4, 3, 32, 32] = 4, 3, 1024
-#         # input_layer: 3 input channels, 6 output channels, 5 kernel size
-#         images = images.to(device)
-#         labels = labels.to(device)
+for epoch in range(num_epochs):
+    for i, (images, labels) in enumerate(train_loader):
+        # origin shape: [4, 3, 32, 32] = 4, 3, 1024
+        # input_layer: 3 input channels, 6 output channels, 5 kernel size
+        images = images.to(device)
+        labels = labels.to(device)
         
-#         #Forward pass
-#         outputs = model(images)
-#         loss = criterion(outputs, labels)
+        #Forward pass
+        outputs = model(images)
+        loss = criterion(outputs, labels)
         
-#         #Backward and optimize
-#         optimizer.zero_grad()
-#         loss.backward()
-#         optimizer.step()
+        #Backward and optimize
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
         
-#         if (i+1)%2000 == 0:
-#             print(f"Epoch [{epoch + 1}/{num_epochs}], Step [{i+1}/ {n_total_steps}], Loss: {loss.item():.4f}")
+        if (i+1)%2000 == 0:
+            print(f"Epoch [{epoch + 1}/{num_epochs}], Step [{i+1}/ {n_total_steps}], Loss: {loss.item():.4f}")
     
 # print('Finished Training')
 FILE = './model/cnn.pth'
