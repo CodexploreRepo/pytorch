@@ -183,7 +183,8 @@ class WineDataset(Dataset):
 # Data loader
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, 
                                            batch_size=batch_size, #say, batch_size = 100
-                                           shuffle=True)
+                                           shuffle=True,
+                                           drop_last = True) # drop_last=True parameter ignores the last batch (when the number of examples in your dataset is not divisible by your batch_size)
 
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, 
                                           batch_size=batch_size, 
