@@ -13,6 +13,7 @@
 - [5. Dataset Transform](#5-dataset-transform)
 - [6. Softmax and Cross Entropy](#6-softmax-and-cross-entropy)
 - [7. Activation Functions](#7-activation-functions)
+- [8. CNN](#8-cnn)
 - [Resources](#resources)
 
 # 1. Basics
@@ -182,7 +183,8 @@ class WineDataset(Dataset):
 # Data loader
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, 
                                            batch_size=batch_size, #say, batch_size = 100
-                                           shuffle=True)
+                                           shuffle=True,
+                                           drop_last = True) # drop_last=True parameter ignores the last batch (when the number of examples in your dataset is not divisible by your batch_size)
 
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, 
                                           batch_size=batch_size, 
@@ -348,6 +350,14 @@ class NeuralNet(nn.Module):
         out = F.sigmoid(self.linear2(out))                  #Directly use
         return out
  ```
+# 8. CNN
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/64508435/165234682-39921752-94e5-4a62-ae6b-5dd2da2ef690.png" width="250" />
+</p>
+
+
+
+[(Back to top)](#table-of-contents)
 
 # Resources
 ## Todo List
