@@ -9,6 +9,9 @@ __pycache__/
 # Macbook
 .DS_Store
 
+#model 
+model/
+
 #data
 code/data/
 code/models/
