@@ -351,6 +351,9 @@ class NeuralNet(nn.Module):
         return out
  ```
 # 8. CNN
+- Image size: `(3, 256, 256)`
+- 6 convolution filters with kernel size: `(3, 5, 5)`, stride=`(1,1)`, padding = `0`
+  - Convolved image size: `(6, 252, 252)`
 <p align="center">
   <img src="https://user-images.githubusercontent.com/64508435/165234682-39921752-94e5-4a62-ae6b-5dd2da2ef690.png" width="250" />
 </p>
