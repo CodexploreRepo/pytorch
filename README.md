@@ -351,6 +351,7 @@ class NeuralNet(nn.Module):
         return out
  ```
 # 8. CNN
+## 8.1 Convolution Layer
 - Image size: `(3, 256, 256)`
 - 6 convolution filters with kernel size: `(3, 5, 5)`, stride=`(1,1)`, padding = `0`
   - Convolved image size: `(6, 252, 252)`
@@ -358,7 +359,15 @@ class NeuralNet(nn.Module):
   <img src="https://user-images.githubusercontent.com/64508435/165234682-39921752-94e5-4a62-ae6b-5dd2da2ef690.png" width="250" />
 </p>
 
-
+## 8.2. Max Pool
+- Accepts a volume of size W1 x H1 x D1 (width, height, depth)
+- MaxPool filter size F, stride S
+- Output: W2 x H2 x D2 where
+```
+W2 = (W1 - F)/S +1
+H2  = (H1 - F)/S+1
+D2  = D1 (unchanged)
+```
 
 [(Back to top)](#table-of-contents)
 
