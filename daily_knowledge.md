@@ -1,6 +1,10 @@
 # Daily Knowledge
 
 # Day 1
+- `torch.flatten(input, start_dim=0, end_dim=- 1)` flattens input by reshaping it into a one-dimensional tensor
+```Python
+torch.flatten(x, 1) # Before: [64, 16, 61, 61] -> After: [64, 16*61*61=59536]
+```
 - `.permute()`: returns a view of the original tensor input with its dimensions permuted.
 ```Python
 print(img.size())   # (3, 256, 256) - (C, H, W)
