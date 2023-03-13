@@ -1,5 +1,27 @@
 # Daily Knowledge
 
+# Day 2
+- Plot a batch of images
+```Python
+def imshow(img, title):
+    
+    plt.figure(figsize=(batch_size * 4, 4))
+    plt.axis('off')
+    plt.imshow(np.transpose(img, (1, 2, 0)))
+    plt.title(title)
+    plt.show()
+    
+def show_batch_images(dataloader):
+    images, labels = next(iter(dataloader))
+    
+    img = torchvision.utils.make_grid(images)
+    imshow(img, title=[str(x.item()) for x in labels])
+    
+    return images, labels
+show_batch_images(train_dataloader)
+```
+![image](https://user-images.githubusercontent.com/64508435/224746587-115d1a79-5a4d-4af3-bf3a-4f2e8738d8d8.png)
+
 # Day 1
 - `torch.flatten(input, start_dim=0, end_dim=- 1)` flattens input by reshaping it into a one-dimensional tensor
 ```Python
