@@ -6,9 +6,15 @@
 torch.flatten(x, 1) # Before: [64, 16, 61, 61] -> After: [64, 16*61*61=59536]
 ```
 - `.permute()`: returns a view of the original tensor input with its dimensions permuted.
+  - `np.transpose()` also can be used for converting the torch tensor   
 ```Python
 print(img.size())   # (3, 256, 256) - (C, H, W)
-img.permute(1,2,0)  # (256, 256, 3) - (H, W, C)
+
+# Method 1: 
+img.permute(1,2,0)  # torch tensor (256, 256, 3) - (H, W, C)
+
+# Method 2: 
+np.transpose(img, (1,2,0))  # torch tensor (256, 256, 3) - (H, W, C)
 ```
 - `.squeeze()`: returns a tensor with all the dimensions of **input of size 1 removed**.
 ```Python
