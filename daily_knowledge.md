@@ -50,7 +50,6 @@ x = torch.randn(2, 3, 4)
 x = x.view(-1)
 # > torch.Size([24]) # 2*3*4 = 24
 
-# keep the first dimension, (-1) flatten the rest
+# (x.size(0)) keep the first dimension, (-1) flatten the rest
 x = x.view(x.size(0), -1) 
-
 ```
