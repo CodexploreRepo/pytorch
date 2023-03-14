@@ -1,7 +1,7 @@
 # Daily Knowledge
 
 # Day 2
-- Plot a batch of images
+- Plot a batch of images using `torchvision.utils.make_grid`
 ```Python
 def imshow(img, title):
     
@@ -42,4 +42,15 @@ np.transpose(img, (1,2,0))  # torch tensor (256, 256, 3) - (H, W, C)
 ```Python
 print(img.size()) # (1, 28,28)
 img.squeeze()     # (28,28)
+```
+- `torch.view()` to reshape the tensor
+```Python
+x = torch.randn(2, 3, 4)
+# > torch.Size([2, 3, 4])
+x = x.view(-1)
+# > torch.Size([24]) # 2*3*4 = 24
+
+# keep the first dimension, (-1) flatten the rest
+x = x.view(x.size(0), -1) 
+
 ```
