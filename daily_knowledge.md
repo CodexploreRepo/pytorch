@@ -1,6 +1,38 @@
 # Daily Knowledge
 
 # Day 2
+- Initialise the weights of the network
+
+```Python
+# Define the CNN architecture
+class Net(torch.nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        # define the network here
+        self.conv1 = torch.nn.Conv2d(3, 6, 3)
+        self.batch_norm1 = torch.nn.BatchNorm2d(6)
+
+        # initialize weights
+        self.initialize_weights()
+
+    def forward(self, x):
+        # define forward function here
+
+
+    def initialize_weights(self):
+        # initialize network weights
+        for layer in self.modules():
+            if isinstance(layer, torch.nn.Conv2d) or isinstance(layer, torch.nn.Linear):
+                init.kaiming_uniform_(layer.weight)
+                if layer.bias is not None:
+                    init.constant_(layer.bias, 0)
+                    
+# Usage:
+net = Net().to(device)
+# train on some paramters
+# re-train on another set of parameters
+net.initialize_weights()
+```
 - Plot a batch of images using `torchvision.utils.make_grid`
 ```Python
 def imshow(img, title):
