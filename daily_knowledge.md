@@ -70,10 +70,26 @@ img.permute(1,2,0)  # torch tensor (256, 256, 3) - (H, W, C)
 # Method 2: 
 np.transpose(img, (1,2,0))  # torch tensor (256, 256, 3) - (H, W, C)
 ```
-- `.squeeze()`: returns a tensor with all the dimensions of **input of size 1 removed**.
+- `.squeeze() vs unsqueeze()` 
+    -  `.squeeze()` returns a tensor with all the dimensions of **input of size 1 removed**.
+    -  `.unsqueeze(input, dim)` Returns a new tensor with a dimension of size one inserted at the specified position.
+        - dim (int) – the index at which to insert the singleton dimension  
 ```Python
+# squeeze examples
 print(img.size()) # (1, 28,28)
 img.squeeze()     # (28,28)
+
+# unsqueeze(0) & unsqueeze(1) examples
+>>> x = torch.tensor([1, 2, 3, 4])
+>>> torch.unsqueeze(x, 0)
+
+tensor([[ 1,  2,  3,  4]])
+>>> torch.unsqueeze(x, 1)
+tensor([[ 1],
+        [ 2],
+        [ 3],
+        [ 4]])
+
 ```
 - `torch.view()` to reshape the tensor
 ```Python
