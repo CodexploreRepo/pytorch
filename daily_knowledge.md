@@ -75,11 +75,13 @@ np.transpose(img, (1,2,0))  # torch tensor (256, 256, 3) - (H, W, C)
     -  `.unsqueeze(input, dim)` Returns a new tensor with a dimension of size one inserted at the specified position.
         - dim (int) – the index at which to insert the singleton dimension  
 ```Python
-# squeeze examples
+# ---- squeeze examples -----
 print(img.size()) # (1, 28,28)
 img.squeeze()     # (28,28)
-
-# unsqueeze(0) & unsqueeze(1) examples
+# ---- unsqueeze examples -----
+# unsqueeze(0) at new dimension at dim0 & unsqueeze(1) at new dimension at dim1 examples
+# unsqueeze(0): (3, 256, 256) -> (1, 3, 256, 256)
+# unsqueeze(1): (3, 256, 256) -> (3, 1, 256, 256)
 >>> x = torch.tensor([1, 2, 3, 4])
 >>> torch.unsqueeze(x, 0)
 
