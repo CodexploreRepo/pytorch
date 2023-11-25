@@ -1,7 +1,7 @@
 # Daily Knowledge
 ## Day 3
 ### GPU on Mac
-```
+```Python
 has_gpu = torch.backends.mps.is_available()
 device = torch.device("mps" if has_gpu else "cpu")
 ```
