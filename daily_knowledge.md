@@ -1,6 +1,11 @@
 # Daily Knowledge
-
-# Day 2
+## Day 3
+### GPU on Mac
+```
+has_gpu = torch.backends.mps.is_available()
+device = torch.device("mps" if has_gpu else "cpu")
+```
+## Day 2
 - Initialise the weights of the network
 
 ```Python
@@ -54,7 +59,7 @@ show_batch_images(train_dataloader)
 ```
 ![image](https://user-images.githubusercontent.com/64508435/224746587-115d1a79-5a4d-4af3-bf3a-4f2e8738d8d8.png)
 
-# Day 1
+## Day 1
 - `torch.flatten(input, start_dim=0, end_dim=- 1)` flattens input by reshaping it into a one-dimensional tensor
 ```Python
 torch.flatten(x, 1) # Before: [64, 16, 61, 61] -> After: [64, 16*61*61=59536]
