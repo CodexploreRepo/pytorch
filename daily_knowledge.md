@@ -2,6 +2,39 @@
 
 ## Day 4
 
+### Learning Rate Scheduler
+
+- It is generally best to first train without a scheduler to establish a baseline.
+- **Always set `min_lr` / `eta_min`** — without a floor, LR can decay to zero and silently freeze training.
+- **Use warmup** for any model with large embedding tables or transformer layers.
+- When using `ReduceLROnPlateau` and early stopping together, their `patience` values must be set deliberately:
+
+```
+Bad setup:
+  ReduceLROnPlateau patience = 5
+  EarlyStopping patience     = 5
+
+  Both fire at the same epoch → no time for the reduced LR to help
+
+Good setup:
+  ReduceLROnPlateau patience = 3   ← fires sooner
+  EarlyStopping patience     = 10  ← gives the reduced LR time to work
+```
+
+- Always Log the Current LR at every epoch so you can reconstruct what happened if training diverges.
+
+```python
+for epoch in range(epochs):
+    train_loss = train_one_epoch(model, optimizer)
+    val_loss   = evaluate(model, val_loader)
+    scheduler.step(val_loss)  # or scheduler.step()
+
+    # Log current LR
+    current_lr = optimizer.param_groups[0]['lr']
+    print(f"Epoch {epoch:03d} | train_loss={train_loss:.4f} | "
+          f"val_loss={val_loss:.4f} | lr={current_lr:.2e}")
+```
+
 ### Cross-Entropy
 
 #### Formulas
