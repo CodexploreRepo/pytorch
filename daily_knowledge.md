@@ -2,7 +2,7 @@
 
 ## Day 4
 
-### Cross-Entropy, Negative Log-Likelihood
+### Cross-Entropy
 
 #### Formulas
 
@@ -15,13 +15,12 @@
 - **CrossEntropyLoss** fuses LogSoftmax + NLLLoss internally, so it takes raw logits. Numerically stable for the same reason as `BCEWithLogitsLoss`.
   - Relationship: `nn.CrossEntropyLoss(logits) ≡ nn.NLLLoss(log_softmax(logits))`
 
-#### Common Mistake vs Best Practice
+#### Binary Classification `nn.BCELoss` vs `nn.BCEWithLogitsLoss`
 
-- **Binary Classification**:
-  - **During Training**: Use `BCEWithLogitsLoss` because it is more stable and robust.
-  - **During Inference**: If you need the actual probability (e.g., to show a confidence score or apply a custom threshold), you must manually apply `torch.sigmoid()` to the model's output.
-  - Why `BCEWithLogitsLoss` ? `nn.BCEWithLogitsLoss()(logits, target)` internally uses the log-sum-exp trick:
-    - `loss = max(x, 0) - x*y + log(1 + exp(-|x|))` this avoids computing sigmoid then log separately, which is numerically safe for large or small logit values (e.g. `sigmoid(100) ≈ 1.0` in float32, making `log(1 - 1.0) = -inf`).
+- **During Training**: Use `BCEWithLogitsLoss` because it is more stable and robust.
+- **During Inference**: If you need the actual probability (e.g., to show a confidence score or apply a custom threshold), you must manually apply `torch.sigmoid()` to the model's output.
+- Why `BCEWithLogitsLoss` ? `nn.BCEWithLogitsLoss()(logits, target)` internally uses the log-sum-exp trick:
+- `loss = max(x, 0) - x*y + log(1 + exp(-|x|))` this avoids computing sigmoid then log separately, which is numerically safe for large or small logit values (e.g. `sigmoid(100) ≈ 1.0` in float32, making `log(1 - 1.0) = -inf`) causing **NaN gradients**.
 
 ```Python
 # logits + BCEWithLogitsLoss (Recommended)
@@ -36,7 +35,9 @@ probs = model(inputs)
 loss = nn.BCELoss(probs, target)
 ```
 
-- **Multi-Class Classification**: `CrossEntropyLoss` = `LogSoftmax` + `NLLLoss` fused into one numerically stable operation:
+#### Multi-Class Classification `nn.NLLLoss` vs `nn.CrossEntropyLoss`
+
+- `CrossEntropyLoss` = `LogSoftmax` + `NLLLoss` fused into one numerically stable operation:
 
 ```
 CE = -x_c + log(Σ exp(x_j))    # x = raw logits, c = true class
