@@ -1,5 +1,69 @@
 # Daily Knowledge
 
+## Day 4
+
+### Cross-Entropy, Negative Log-Likelihood
+
+#### Formulas
+
+- **BCE (Binary Negative Log-Likelihood)** (binary, `y ∈ {0,1}`): `-(1/N) Σ [y·log(p) + (1-y)·log(1-p)]`
+<p align="center"><img src="./assets/img/binary-negative-log-likelyhood.gif" width=500></p>
+
+- **NLL (Negative Log-Likelihood)** (multi-class): `-log(p_c)` where `c` is the true class
+<p align="center"><img src="./assets/img/multi-class-nll.gif" width=500></p>
+
+- **CrossEntropyLoss** fuses LogSoftmax + NLLLoss internally, so it takes raw logits. Numerically stable for the same reason as `BCEWithLogitsLoss`.
+  - Relationship: `nn.CrossEntropyLoss(logits) ≡ nn.NLLLoss(log_softmax(logits))`
+
+#### Common Mistake vs Best Practice
+
+- **Binary Classification**:
+  - **During Training**: Use `BCEWithLogitsLoss` because it is more stable and robust.
+  - **During Inference**: If you need the actual probability (e.g., to show a confidence score or apply a custom threshold), you must manually apply `torch.sigmoid()` to the model's output.
+  - Why `BCEWithLogitsLoss` ? `nn.BCEWithLogitsLoss()(logits, target)` internally uses the log-sum-exp trick:
+    - `loss = max(x, 0) - x*y + log(1 + exp(-|x|))` this avoids computing sigmoid then log separately, which is numerically safe for large or small logit values (e.g. `sigmoid(100) ≈ 1.0` in float32, making `log(1 - 1.0) = -inf`).
+
+```Python
+# logits + BCEWithLogitsLoss (Recommended)
+model = nn.Sequential(nn.Linear(10, 1)) # No Sigmoid here
+
+logits = model(input)
+loss = nn.BCEWithLogitsLoss(logits, target)
+
+# Sigmoid + BCELoss (Avoid)
+model = nn.Sequential(nn.Linear(10, 1), nn.Sigmoid())
+probs = model(inputs)
+loss = nn.BCELoss(probs, target)
+```
+
+- **Multi-Class Classification**: `CrossEntropyLoss` = `LogSoftmax` + `NLLLoss` fused into one numerically stable operation:
+
+```
+CE = -x_c + log(Σ exp(x_j))    # x = raw logits, c = true class
+```
+
+This avoids computing softmax then log separately, preventing overflow/underflow for large logits.
+
+**Best Practice:** pass raw logits — do NOT apply softmax in `forward`:
+
+```Python
+import torch
+import torch.nn as nn
+
+# Suppose 3 classes
+
+# Option 1: CrossEntropyLoss (Recommended)
+criterion_ce = nn.CrossEntropyLoss()
+loss_ce = criterion_ce(logits, target)
+
+# Option 2: LogSoftmax + NLLLoss (Avoid)
+log_softmax = nn.LogSoftmax(dim=1)
+criterion_nll = nn.NLLLoss()
+loss_nll = criterion_nll(log_softmax(logits), target)
+
+# loss_ce and loss_nll are equal
+```
+
 ## Day 3
 
 ### Torch Basics
