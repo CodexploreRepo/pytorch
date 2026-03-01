@@ -75,7 +75,32 @@ encoded = series.map(class_to_idx).fillna(fallback).astype(int).values
 
 ### `pin_memory`
 
-`pin_memory=True` in `DataLoader` allocates CPU tensors in **pinned (page-locked) memory**, enabling faster host-to-GPU transfers.
+- `pin_memory=True` in `DataLoader` allocates CPU tensors in **pinned (page-locked) memory**, enabling faster host-to-GPU transfers.
+- Set the `pin_memory` argument to True in your DataLoader definition. This automatically tells the data loader to load the batches into pinned memory after collation
+
+```Python
+from torch.utils.data import DataLoader
+
+# ... (define your dataset and other parameters) ...
+
+dataloader = DataLoader(
+    dataset,
+    batch_size=64,
+    shuffle=True,
+    num_workers=4,
+    pin_memory=True # Enable pinned memory
+)
+```
+
+- Inside your training loop, using `non_blocking=True` with pinned memory allows the data transfer to overlap with other GPU operations, maximizing throughput
+
+```Python
+for data, target in dataloader:
+    # Transfer the data from pinned host memory to GPU device
+    data = data.to("cuda", non_blocking=True)
+    target = target.to("cuda", non_blocking=True)
+    # ... (rest of your training code) ...
+```
 
 #### How it works
 
