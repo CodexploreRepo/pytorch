@@ -18,6 +18,11 @@
   - [What sharding means](#what-sharding-means)
   - [Three sharding strategies](#three-sharding-strategies)
   - [Correct sharding rule](#correct-sharding-rule)
+- [Parquet-Specific Patterns](#parquet-specific-patterns)
+  - [read_row_group vs read_parquet](#pyarrowparquetfileread_row_group-vs-pandasread_parquet)
+  - [Open files in **iter**, never in **init**](#open-files-in-__iter__-never-in-__init__)
+  - [transform callable pattern](#transform-callable-pattern)
+  - [batch_size=None with pre-batched datasets](#batch_sizenone-with-pre-batched-datasets)
 - [Complete Code Pattern](#complete-code-pattern)
 
 ---
@@ -208,7 +213,7 @@ The DataLoader pulls from all workers interleaved:
 ```
 Dataset: [A, B, C, D, E, F, G, H]   num_workers=2, batch_size=4
 
-Batch 1: [A, B, A, B]   ← 2 from Worker0, 2 from Worker1
+Batch 1: [A, B, A, B]   ← 2 (A,B) from Worker0, 2 (A,B) from Worker1
 Batch 2: [C, D, C, D]
 Batch 3: [E, F, E, F]
 Batch 4: [G, H, G, H]
@@ -275,14 +280,135 @@ Worker 3: [G, H]
 
 **3. By file (for file-based streaming)**
 
-```
-files = [file1, file2, file3, file4]
+Assign a contiguous block of files to each worker using the same remainder-aware
+algorithm as Strategy 2, applied to a file list instead of sample indices.
 
-Worker 0: reads file1
-Worker 1: reads file2
-Worker 2: reads file3
-Worker 3: reads file4
+```python
+def __iter__(self):
+    worker_info = torch.utils.data.get_worker_info()
+
+    if worker_info is None:
+        worker_files = self.files           # single-process: all files
+    else:
+        n_files   = len(self.files)
+        n_workers = worker_info.num_workers
+        wid       = worker_info.id
+
+        chunk     = n_files // n_workers
+        remainder = n_files % n_workers
+
+        # Workers with id < remainder get one extra file
+        if wid < remainder:
+            start = wid * (chunk + 1)
+            end   = start + chunk + 1
+        else:
+            start = wid * chunk + remainder
+            end   = start + chunk
+
+        worker_files = self.files[start:end]   # empty slice → yields nothing safely
+
+    for path in worker_files:
+        yield from self._iter_file(path)
 ```
+
+**Remainder handling example:**
+
+```
+7 files, 3 workers → chunk=2, remainder=1
+  worker 0 (wid < remainder): files[0:3]  (3 files)
+  worker 1:                   files[3:5]  (2 files)
+  worker 2:                   files[5:7]  (2 files)
+
+Edge case: fewer files than workers → worker gets empty slice, yields nothing.
+```
+
+---
+
+## Parquet-Specific Patterns
+
+### `pyarrow.ParquetFile.read_row_group()` vs `pandas.read_parquet()`
+
+| Approach                                 | RAM per worker          | Use when                                 |
+| ---------------------------------------- | ----------------------- | ---------------------------------------- |
+| `pq.ParquetFile(path).read_row_group(i)` | One row group at a time | Files are large; need to cap memory      |
+| `pd.read_parquet(path)`                  | Entire file in RAM      | Files are small enough to hold in memory |
+
+Row-group streaming example:
+
+```python
+def _iter_file(self, path):
+    import pyarrow.parquet as pq           # import inside worker
+    pf = pq.ParquetFile(path)
+
+    for rg_idx in range(pf.metadata.num_row_groups):
+        df = pf.read_row_group(rg_idx, columns=cols).to_pandas()
+        yield df
+```
+
+### Open files in `__iter__`, never in `__init__`
+
+```python
+# WRONG — __init__ runs in the main process; ParquetFile handles
+# are not picklable and will raise when workers are spawned
+class BadDataset(IterableDataset):
+    def __init__(self, path):
+        self.pf = pq.ParquetFile(path)   # ← not safe
+
+# CORRECT — open the file inside __iter__ or a helper called from __iter__
+class GoodDataset(IterableDataset):
+    def __init__(self, path):
+        self.path = path                  # store path only
+
+    def _iter_file(self, path):
+        pf = pq.ParquetFile(path)         # opened in worker subprocess
+        ...
+```
+
+The same rule applies to any resource that holds a file descriptor or network
+socket (database connections, HDF5 handles, `fsspec` file objects, etc.).
+
+### `transform` callable pattern
+
+Pass an optional `transform(df) -> df` to preprocess each row group inside the
+worker before converting to tensors. The full row group is available as a
+`pd.DataFrame`, so vectorised operations (normalisation, feature engineering,
+filtering) run efficiently without per-sample Python overhead.
+
+```python
+def normalize_features(df):
+    mu  = df[feature_cols].mean()
+    std = df[feature_cols].std().replace(0, 1)
+    df[feature_cols] = (df[feature_cols] - mu) / std
+    return df
+
+dataset = ParquetPartitionDataset(..., transform=normalize_features)
+```
+
+The transform runs in the worker subprocess — it is safe to use pandas, numpy,
+and scikit-learn transforms here.
+
+### `batch_size=None` with pre-batched datasets
+
+When `_iter_file` yields an entire row group as a 2-D tensor `(rg_size, n_features)`,
+set `batch_size=None` so the DataLoader passes tensors through without re-batching:
+
+```python
+loader = DataLoader(
+    dataset,
+    batch_size=None,           # row-group tensors passed through as-is
+    num_workers=2,
+    pin_memory=True,
+    persistent_workers=True,
+)
+
+for features, labels in loader:
+    features = features.to(device, non_blocking=True)   # (rg_size, n_features)
+    labels   = labels.to(device, non_blocking=True)     # (rg_size, 1)
+```
+
+> **Full code example:** `code/tutorials/15_parquet_iterable_dataset.ipynb`
+
+---
 
 ### Correct sharding rule
 
@@ -356,12 +482,16 @@ for features, labels in loader:
 
 ### Key rules summary
 
-| Rule                      | Detail                                                        |
-| ------------------------- | ------------------------------------------------------------- |
-| `pin_memory=True`         | Pairs with `non_blocking=True` for async GPU transfers        |
-| `num_workers > 0`         | Always shard `IterableDataset` using `get_worker_info()`      |
-| `persistent_workers=True` | Avoids worker respawn cost between epochs                     |
-| MPS (Apple Silicon)       | `pin_memory` is safe but has no effect — skip for clarity     |
-| Too many workers          | Competes for CPU cache and memory bandwidth — benchmark first |
+| Rule                                     | Detail                                                                         |
+| ---------------------------------------- | ------------------------------------------------------------------------------ |
+| `pin_memory=True`                        | Pairs with `non_blocking=True` for async GPU transfers                         |
+| `num_workers > 0`                        | Always shard `IterableDataset` using `get_worker_info()`                       |
+| `persistent_workers=True`                | Avoids worker respawn cost between epochs                                      |
+| MPS (Apple Silicon)                      | `pin_memory` is safe but has no effect — skip for clarity                      |
+| Too many workers                         | Competes for CPU cache and memory bandwidth — benchmark first                  |
+| `batch_size=None`                        | Use when dataset yields pre-batched tensors (e.g. parquet row groups)          |
+| Open files in `__iter__`, not `__init__` | `__init__` runs in main process; file handles can't be pickled into workers    |
+| File-level sharding for parquet          | Assign whole files per worker using contiguous-block algorithm on `self.files` |
 
-> **Full code example:** `code/tutorials/14_iterable_dataset_sharding.ipynb`
+> **IterableDataset basics:** `code/tutorials/14_iterable_dataset_sharding.ipynb`
+> **Parquet file-level sharding:** `code/tutorials/15_parquet_iterable_dataset.ipynb`

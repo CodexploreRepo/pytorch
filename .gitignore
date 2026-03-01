@@ -16,6 +16,7 @@ model/
 code/data/
 code/models/
 code/results/
+*data*
 
 # Distribution / packaging
 .Python
