@@ -2,6 +2,73 @@
 
 ## Day 8
 
+### Adam vs AdamW Optimizer
+
+- Mental Model to Remember
+
+```
+Adam:    [gradient + λw] → adaptive scaling → update
+                ↑
+         decay gets DISTORTED by adaptive scaling ❌
+
+AdamW:   [gradient]      → adaptive scaling → update
+                                                  ↓
+                                         then subtract α * λ * w
+                                                  ↑
+                                  decay is CLEAN, always proportional to w ✅
+```
+
+Another way to think about it:
+
+```
+Adam   = momentum + RMSProp + broken weight decay
+AdamW  = momentum + RMSProp + correct weight decay
+```
+
+---
+
+#### PyTorch Code
+
+```python
+import torch.optim as optim
+
+# Adam — weight_decay is L2 reg mixed into gradient (distorted)
+optimizer = optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
+
+# AdamW — weight_decay is true decoupled decay (use larger value safely)
+optimizer = optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-2)
+```
+
+Per-layer learning rates (e.g. fine-tuning):
+
+```python
+optimizer = optim.AdamW([
+    {"params": model.backbone.parameters(), "lr": 1e-5},  # frozen-ish
+    {"params": model.head.parameters(),     "lr": 1e-3},  # train fast
+], weight_decay=1e-2)
+```
+
+---
+
+#### Practical Rule
+
+| Use case                   | Optimizer         |
+| -------------------------- | ----------------- |
+| Transformers / LLMs        | AdamW             |
+| Large CNNs / vision models | AdamW             |
+| Small MLP / tabular data   | Adam (often fine) |
+| Need strong regularization | AdamW             |
+
+---
+
+#### Common Pitfalls
+
+1. **Don't use `Adam` with `weight_decay` for real regularization** — use `AdamW` instead
+2. **LR is still the most important hyperparameter** — try `1e-4` or `3e-4` if `1e-3` diverges
+3. **Adam can overfit faster** than SGD — compensate with dropout or switch to AdamW
+4. **`ε` matters for stability** — increase to `1e-6` if you see NaN losses with fp16 / mixed precision
+5. **AdamW tolerates larger `weight_decay`** (e.g. `0.01–0.1`) — don't treat it the same as Adam's
+
 ### Handling Imbalance
 
 There are methods to handling class imbalance:
