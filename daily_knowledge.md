@@ -1,5 +1,141 @@
 # Daily Knowledge
 
+## Day 8
+
+### Handling Imbalance
+
+There are methods to handling class imbalance:
+
+1.  pos_weight
+2.  Stratified batch sampling
+3.  Focal loss
+
+#### Pratical Guide
+
+For learning / baseline:
+
+    BCEWithLogitsLoss + pos_weight
+
+For competitive tabular models (Kaggle):
+
+    Stratified sampling (in-batch) + focal loss
+
+For production risk models:
+
+    BCE + pos_weight + probability calibration
+
+#### Kaggle Winning Strategy
+
+```shell
+imbalanced dataset
+↓
+* stratified batches
+↓
+* focal loss
+↓
+early stopping
+↓
+ensemble
+```
+
+#### `pos_weight` vs `class_weight`
+
+- Use `pos_weight`: only positive class scaled (for binary classification)
+  - L = -\[ pos_weight \* y log(p) + (1-y) log(1-p) \]
+- Use `class_weight` when you have multiple, imbalanced classes in a single-label scenario (e.g., ImageNet with 1000 classes, some having fewer images).
+
+### Binary Cross Entropy
+
+Loss per sample:
+
+L = -\[ y log(p) + (1-y) log(1-p) \]
+
+Where:
+
+    p = sigmoid(logit)
+
+#### Batch Loss
+
+By default:
+
+    reduction = "mean"
+
+So final loss is:
+
+    batch_loss = average(sample_losses)
+
+```shell
+# Example: suppose batch_size = 4
+sample1 = 0.20
+sample2 = 0.80
+sample3 = 0.40
+sample4 = 0.60
+
+# With default "mean":
+loss = (0.20 + 0.80 + 0.40 + 0.60) / 4
+     = 0.50
+```
+
+- PyTorch allows three options:
+  - `nn.BCEWithLogitsLoss(reduction="mean")` (most common) return a scalar value `0.5`
+  - `nn.BCEWithLogitsLoss(reduction="sum")` returns `loss = 0.20 + 0.80 + 0.40 + 0.60 = 2.0`
+  - `nn.BCEWithLogitsLoss(reduction="none")` return **per-sample** loss `tensor([0.20, 0.80, 0.40, 0.60])` instead of `0.5` with "mean" option
+    - Useful for: custom weighting, focal loss, hard example mining
+
+```Python
+# Example: example of focal loss using reduction="none"
+
+import torch
+import torch.nn.functional as F
+
+class FocalLoss(torch.nn.Module):
+
+    def __init__(self, gamma=2):
+        super().__init__()
+        self.gamma = gamma
+
+    def forward(self, logits, targets):
+
+        bce = F.binary_cross_entropy_with_logits(
+            logits,
+            targets,
+            reduction="none"
+        )
+
+        probs = torch.sigmoid(logits)
+
+        pt = targets * probs + (1 - targets) * (1 - probs)
+
+        loss = ((1 - pt) ** self.gamma) * bce
+
+        return loss.mean()
+```
+
+### Why `model.eval()` and `torch.no_grad()` are both required during validation ?
+
+- `model.eval()` switches these layers to inference mode
+  - Dropout: disable during inference
+  - BatchNorm: using running stats instead of batch stats
+- `torch.no_grad()` disables gradient tracking.
+  - PyTorch normally builds a computation graph for backpropagation `loss.backward()`, but during validation, we NEVER call `backward()`
+- Rule of thumbs:
+
+```Python
+# Example 1:
+model.eval()
+
+with torch.no_grad():
+    for X_batch, y_batch in valid_loader:
+
+# Example 2:
+@torch.no_grad()
+def predict_loader(model, loader, device):
+    model.eval()
+    preds = []
+
+    for batch in loader:
+```
+
 ## Day 7
 
 ### Vectorize the Dataset - The Biggest Win
